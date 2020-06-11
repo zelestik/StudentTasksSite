@@ -7,10 +7,13 @@
                 <b-navbar-nav>
                     <b-nav-item><router-link class="link" to="/tasks"><b>Задачи</b></router-link></b-nav-item>
                 </b-navbar-nav>
-                <!-- Right aligned nav items -->
+                <b-navbar-nav v-if="group !== 'null'">
+                    <b-nav-item><router-link class="link" to="/group_tasks"><b>Задачи группы</b></router-link></b-nav-item>
+                </b-navbar-nav>
+                <!-- Элементы выравненные по правому краю -->
                 <b-navbar-nav class="ml-auto">
                     <b-navbar-nav right>
-                        <b-nav-item><router-link class="link" to="/new_task"><b>Создать задачу</b></router-link></b-nav-item>
+                        <b-nav-item v-if="role !== '2'"><router-link class="link" to="/new_task"><b>Создать задачу</b></router-link></b-nav-item>
                     </b-navbar-nav>
                     <b-nav-item-dropdown right>
                         <template v-slot:button-content><b>Аккаунт</b></template>
@@ -28,7 +31,9 @@
         name: "header",
         data(){
             return{
-                user_name: document.cookie.replace(/(?:(?:^|.*;\s*)name=\s*([^;]*).*$)|^.*$/, "$1")
+                user_name: document.cookie.replace(/(?:(?:^|.*;\s*)name=\s*([^;]*).*$)|^.*$/, "$1"),
+                group: document.cookie.replace(/(?:(?:^|.*;\s*)group=\s*([^;]*).*$)|^.*$/, "$1"),
+                role: document.cookie.replace(/(?:(?:^|.*;\s*)role=\s*([^;]*).*$)|^.*$/, "$1")
             }
         },
         methods:{
@@ -47,6 +52,7 @@
         async created(){
             if (!(document.cookie.replace(/(?:(?:^|.*;\s*)username=\s*\s*([^;]*).*$)|^.*$/, "$1").length>0 && document.cookie.replace(/(?:(?:^|.*;\s*)pass=\s*([^;]*).*$)|^.*$/, "$1").length>0))
                 await this.$router.push('/login');
+            console.log(this.group);
 
         }
     }

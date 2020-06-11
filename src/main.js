@@ -10,6 +10,7 @@ import new_task from "@/components/new_task";
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import group_tasks from "@/components/group_tasks";
 
 Vue.config.productionTip = false;
 Vue.use(VueResource);
@@ -25,7 +26,8 @@ const router = new VueRouter({
     {path: '/tasks', component: tasks},
     {path: '/task/:id', name: 'task', component: task},
     {path: '/new_task', component: new_task},
-    {path: '/about', component: about}
+    {path: '/about', component: about},
+    {path: '/group_tasks', component: group_tasks}
   ]
 });
 

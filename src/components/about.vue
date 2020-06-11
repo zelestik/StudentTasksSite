@@ -7,6 +7,7 @@
         <p v-if="role ==='0'">Вы - студент</p>
         <p v-if="role ==='1'">Вы - староста</p>
         <p v-if="role ==='2'">Вы - администратор</p>
+        <p><button class="btn">История авторизаций</button></p>
     </div>
 </template>
 
@@ -33,5 +34,9 @@
     *{
         color: rgb(186, 102, 187);
         text-align: center;
+    }
+    .btn{
+        color: white;
+        background: rgb(186, 102, 187);;
     }
 </style>

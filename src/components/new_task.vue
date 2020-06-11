@@ -7,9 +7,9 @@
         <p><b>Описание</b></p>
         <input type="text" v-model="task.description">
         <p><b>Сделать до</b></p>
-        <input type="date" v-model="task.exp_date">
+        <input type="date" v-model="task.expiration_date">
         <p><b>Тип</b></p>
-        <select name="example" v-model="task.type">
+        <select name="example" v-model="task.id_type">
             <option value="1">Лабораторная работа</option>
             <option value="2">Домашняя работа</option>
             <option value="0">Другое</option>
@@ -32,8 +32,8 @@
                 task:{
                   name: "",
                   description: "",
-                  exp_date: new Date(),
-                  type: 0
+                  expiration_date: new Date(),
+                  id_type: 0
                 },
                 for_group: false,
                 username: document.cookie.replace(/(?:(?:^|.*;\s*)username=\s*\s*([^;]*).*$)|^.*$/, "$1"),
@@ -45,11 +45,13 @@
             }
         },
         methods:{
-            async add_task(){
-                if (!(this.for_group)) {
-                    if (this.task.name !== "") {
+            async add_task(){ // Обработка нажатия кнопки добавления задачи
+                    if (this.task.name !== "") { // Название задачи не должно быть пустым
                         try {
-                            await this.$http.post(`http://localhost:5000/post_tasks/${this.username}/${this.pass}`, this.task).then((res) => (this.answer = res));
+                            if (this.for_group)
+                                await this.$http.post(`http://ip2020.std-982.ist.mospolytech.ru/post_group_tasks/${this.username}/${this.pass}`, this.task).then((res) => (this.answer = res));
+                            else
+                                await this.$http.post(`http://ip2020.std-982.ist.mospolytech.ru/post_tasks/${this.username}/${this.pass}`, this.task).then((res) => (this.answer = res));
                             if (this.answer.bodyText === "0") {
                                 alert("Успешно");
                                 await this.$router.push('/tasks');
@@ -68,7 +70,6 @@
                             this.logout();
                         }
                     }
-                }
             },
             async logout(){
                 //"Удаляем" куки и отправляем на страницу входа
@@ -81,6 +82,11 @@
                 }
                 await this.$router.push('/login');
             },
+        },
+        async created(){
+            if (this.role === '2'){
+                await this.$router.push('/tasks');
+            }
         }
     }
 </script>

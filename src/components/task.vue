@@ -11,7 +11,7 @@
         components:{
             my_header
         },
-        created(){
+        created(){ // Пока что механизм детального отображения задачи не реализован
             this.myID = this.$route.params.id;
         }
     }

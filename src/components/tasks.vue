@@ -1,9 +1,26 @@
 <template>
     <div id="tasks">
         <my_header></my_header>
+        <div class="options">
+            <input class="option" type="text" v-model="search_query" @change="filter_table">
+            <select class="option" v-model="status_filter_by_type" @change="filter_table">
+                <option value="0">Все типы задач</option>
+                <option value="1">Другое</option>
+                <option value="2">Лабораторные работы</option>
+                <option value="3">Домашние задания</option>
+            </select>
+            <select class="option" v-model="status_filter_by_status" @change="filter_table">
+                <option value="0">Все статусы</option>
+                <option value="1">Создано</option>
+                <option value="2">В работе</option>
+                <option value="3">Сделано</option>
+                <option value="4">Все невыполненные задачи</option>
+            </select>
+        </div>
         <table class="table">
             <thead class="thead-light">
                 <tr>
+                    <th scope="col"><input type="checkbox" v-model="allTasksAreChecked" @click="allTasksChecking"></th>
                     <th scope="col">Название</th>
                     <th scope="col">Описание</th>
                     <th scope="col">Сделать до</th>
@@ -14,28 +31,28 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="task in tasks" :key="task.id">
+                <tr v-for="task in tasksForShow" :key="task.id">
+                    <td><input type="checkbox" v-model="task.isChecked" @change="checkForCheckBoxes"></td>
                     <td><router-link class="link" :to="{name: 'task', params:{id: task.id}}">{{task.name}}</router-link></td>
                     <td>{{task.description}}</td>
-                    <td v-if="task.exp_date instanceof Date">{{task.exp_date.toLocaleDateString()}}</td>
+                    <td v-if="task.expiration_date instanceof Date">{{task.expiration_date.toLocaleDateString()}}</td>
                     <td v-if="role !== '2'">
-                        <select name="example" v-model="task.status" @change="statusChanged(task)">
+                        <select name="example" v-model="task.id_status" @change="statusChanged(task)">
                             <option value="0" :selected="0===task.status">Создано</option>
                             <option value="1" :selected="1===task.status">В работе</option>
                             <option value="2" :selected="2===task.status">Сделано</option>
                         </select>
                     </td>
                     <td v-else-if="role === '2'">{{task.group}}</td>
-                    <td v-if="task.type === 1">Лабораторная работа</td>
-                    <td v-else-if="task.type === 2">Домашняя работа</td>
-                    <td v-else>-</td>
+                    <td>{{task.type}}</td>
                     <td v-if="role !== '2'">
-                        <div v-if="Math.floor(task.exp_date - Date.now())>=0">{{Math.floor((task.exp_date - Date.now())/86400000)}}</div>
+                        <div v-if="Math.floor(task.expiration_date - Date.now())>=0">{{Math.floor((task.expiration_date - Date.now())/86400000)}}</div>
                         <div v-else>Время истекло</div>
                     </td>
                 </tr>
             </tbody>
         </table>
+        <div class="status_btn" v-if="isSomeChecked"><button class="btn">В работу</button> <button class="btn">Сделано</button></div>
     </div>
 </template>
 
@@ -54,22 +71,34 @@
                 group: document.cookie.replace(/(?:(?:^|.*;\s*)group=\s*([^;]*).*$)|^.*$/, "$1"),
                 role: document.cookie.replace(/(?:(?:^|.*;\s*)role=\s*([^;]*).*$)|^.*$/, "$1"),
                 cookie: document.cookie,
-                tasks: [{}]
+                search_query: "",
+                status_filter_by_type: 0,
+                status_filter_by_status: 4,
+                tasks: [{}],
+                allTasksAreChecked: false,
+                isSomeChecked: false,
+                tasksForShow: []
             }
         },
         methods:{
-            async task_load(){
+            async task_load(){ // Метод загрузки задач
                 if (this.username.length > 0 && this.pass.length > 0){ //Проверка на наличие в куках username и password
                     try {
-                        await this.$http.get(`http://localhost:5000/tasks/${this.username}/${this.pass}`).then((res) => res.json()).then((res) => (this.tasks = res));
+                        await this.$http.get(`http://ip2020.std-982.ist.mospolytech.ru/tasks/${this.username}/${this.pass}`).then((res) => res.json()).then((res) => (this.tasks = res));
                         if (this.tasks === -1){
                             this.logout();
                         }
                         for (let task of this.tasks){ //преобразование даты из числа YYYYDDMM в дату
-                            let ed = task.exp_date;
+                            task.isChecked = false;
+                            task.isSearchRes = true;
+                            task.isTypeFilterRes = true;
+                            task.isStatusRes = true;
+                            let ed = task.expiration_date;
                             let year = Math.floor(ed / 10000);
-                            task.exp_date = new Date(year, Math.floor(task.exp_date/100) - (year*100)-1, task.exp_date % 100);
+                            task.expiration_date = new Date(year, Math.floor(task.expiration_date/100) - (year*100)-1, task.expiration_date % 100);
                         }
+                        this.tasks.sort((a, b) => a.expiration_date > b.expiration_date ? 1 : -1);
+                        this.filter_table();
                     }catch (e) {
                         console.log(e);
                         alert("Сервер недоступен, попробуйте позже");
@@ -92,15 +121,39 @@
             async statusChanged(task){
                 let for_send = {
                     id: task.id,
-                    status: task.status
+                    id_status: task.id_status
                 };
                 try{
-                await this.$http.put(`http://localhost:5000/status_change/${this.username}/${this.pass}`, for_send);
+                await this.$http.put(`http://ip2020.std-982.ist.mospolytech.ru/status_change/${this.username}/${this.pass}`, for_send);
                 }catch (e) {
                     console.log(e);
                     alert("Произошла ошибка сервера, повторите вход");
                     this.logout();
                 }
+            },
+            allTasksChecking(){
+                    for (let task of this.tasks){
+                        task.isChecked = !this.allTasksAreChecked;
+                    }
+                    this.checkForCheckBoxes();
+
+            },
+            filter_table(){
+                console.log("1");
+                this.tasksForShow = [];
+                console.log(this.tasks);
+                for (let task of this.tasks){
+                    if ((this.search_query === "" || task.name.includes(this.search_query) || task.description.includes(this.search_query)) &&
+                        (this.status_filter_by_status == 0 || task.id_status === this.status_filter_by_status - 1 || (this.status_filter_by_status == 4 && (task.id_status === 0 || task.id_status === 1 ))) &&
+                        (this.status_filter_by_type == 0 || task.id_type === this.status_filter_by_type - 1)) {
+                        this.tasksForShow.push(task);
+
+                    }
+                }
+            },
+            checkForCheckBoxes(){
+                this.isSomeChecked = this.tasks.some(arrVal => arrVal.isChecked === true);
+                console.log(this.isSomeChecked);
             }
         },
         created() {
@@ -112,5 +165,24 @@
 <style scoped>
     .link{
         color: rgb(186, 102, 187);
+    }
+    .option{
+        height: 25px;
+        float: right;
+        margin: 2px 10px;
+    }
+    .options{
+        background-color: #e9ecef;
+        height: 29px;
+        width: 100%;
+    }
+    .status_btn{
+        bottom: 10px;
+        right: 10px;
+        position: fixed;
+    }
+    .btn{
+        background: rgb(186, 102, 187);
+        color: white;
     }
 </style>

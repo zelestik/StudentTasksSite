@@ -25,11 +25,11 @@
 
         },
         methods:{
-            async login(){
-                if (this.username.length > 0 && this.pass.length > 0){
+            async login(){ // По нажатию на кнопку "Войти"
+                if (this.username.length > 0 && this.pass.length > 0){// Проверяем, чтобы поля логина и пароля не были пустыми
                     try{
-                        await this.$http.get(`http://localhost:5000/login/${this.username}/${this.pass}/Web/${this.version}`).then((res)=>res.json()).then((res)=> (this.user=res));
-                        if (this.user !== -1 && this.user !== null) {
+                        await this.$http.get(`http://ip2020.std-982.ist.mospolytech.ru/login/${this.username}/${this.pass}/Web/${this.version}`).then((res)=>res.json()).then((res)=> (this.user=res));
+                        if (this.user !== -1 && this.user !== null) { // Если вход успешен, записываем пользователя в cookie
                             document.cookie = `username=${this.username}`;
                             document.cookie = `pass=${this.pass}`;
                             document.cookie = `name=${this.user.name}`;
