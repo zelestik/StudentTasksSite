@@ -3,13 +3,13 @@
         <my_header></my_header>
         <div class="options">
             <input class="option" type="text" v-model="search_query" @change="filter_table">
-            <select class="option" v-model="status_filter_by_type" @change="filter_table">
+            <select v-if="role !== '2'" class="option" v-model="status_filter_by_type" @change="filter_table">
                 <option value="0">Все типы задач</option>
                 <option value="1">Другое</option>
                 <option value="2">Лабораторные работы</option>
                 <option value="3">Домашние задания</option>
             </select>
-            <select class="option" v-model="status_filter_by_status" @change="filter_table">
+            <select v-if="role !== '2'" class="option" v-model="status_filter_by_status" @change="filter_table">
                 <option value="0">Все статусы</option>
                 <option value="1">Создано</option>
                 <option value="2">В работе</option>
@@ -20,7 +20,7 @@
         <table class="table">
             <thead class="thead-light">
                 <tr>
-                    <th scope="col"><input type="checkbox" v-model="allTasksAreChecked" @click="allTasksChecking"></th>
+                    <th scope="col" v-if="role !== '2'"><input type="checkbox" v-model="allTasksAreChecked" @click="allTasksChecking"></th>
                     <th scope="col">Название</th>
                     <th scope="col">Описание</th>
                     <th scope="col">Сделать до</th>
@@ -32,7 +32,7 @@
             </thead>
             <tbody>
                 <tr v-for="task in tasksForShow" :key="task.id">
-                    <td><input type="checkbox" v-model="task.isChecked" @change="checkForCheckBoxes"></td>
+                    <td v-if="role !== '2'"><input type="checkbox" v-model="task.isChecked" @change="checkForCheckBoxes"></td>
                     <td><router-link class="link" :to="{name: 'task', params:{id: task.id}}">{{task.name}}</router-link></td>
                     <td>{{task.description}}</td>
                     <td v-if="task.expiration_date instanceof Date">{{task.expiration_date.toLocaleDateString()}}</td>
@@ -144,8 +144,8 @@
                 console.log(this.tasks);
                 for (let task of this.tasks){
                     if ((this.search_query === "" || task.name.includes(this.search_query) || task.description.includes(this.search_query)) &&
-                        (this.status_filter_by_status == 0 || task.id_status === this.status_filter_by_status - 1 || (this.status_filter_by_status == 4 && (task.id_status === 0 || task.id_status === 1 ))) &&
-                        (this.status_filter_by_type == 0 || task.id_type === this.status_filter_by_type - 1)) {
+                        (this.role == 2 || this.status_filter_by_status == 0 || task.id_status === this.status_filter_by_status - 1 || (this.status_filter_by_status == 4 && (task.id_status === 0 || task.id_status === 1 ))) &&
+                        (this.role == 2 || this.status_filter_by_type == 0 || task.id_type === this.status_filter_by_type - 1)) {
                         this.tasksForShow.push(task);
 
                     }
