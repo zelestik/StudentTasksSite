@@ -28,6 +28,7 @@
                     <th scope="col" v-if="role === '2'">Группа</th>
                     <th scope="col">Тип</th>
                     <th scope="col" v-if="role !== '2'">Осталось дней</th>
+                    <th scope="col">Cоздано</th>
                 </tr>
             </thead>
             <tbody>
@@ -49,10 +50,11 @@
                         <div v-if="Math.floor(task.expiration_date - Date.now())>=0">{{Math.floor((task.expiration_date - Date.now())/86400000)}}</div>
                         <div v-else>Время истекло</div>
                     </td>
+                    <td v-if="task.creation_date instanceof Date">{{task.creation_date.toLocaleDateString()}}</td>
                 </tr>
             </tbody>
         </table>
-        <div class="status_btn" v-if="isSomeChecked"><button class="btn">В работу</button> <button class="btn">Сделано</button></div>
+        <div class="status_btn" v-if="isSomeChecked"><button class="btn" @click="manyStatusesChange(1)">В работу</button> <button class="btn" @click="manyStatusesChange(2)">Сделано</button></div>
     </div>
 </template>
 
@@ -81,6 +83,16 @@
             }
         },
         methods:{
+            async manyStatusesChange(id_status){
+                for (let task of this.tasks) {
+                    if (task.isChecked){
+                        task.id_status = id_status;
+                        await this.changeStatus(task);
+                        task.isChecked = false;
+                    }
+                }
+                this.$forceUpdate();
+            },
             async task_load(){ // Метод загрузки задач
                 if (this.username.length > 0 && this.pass.length > 0){ //Проверка на наличие в куках username и password
                     try {
@@ -94,8 +106,11 @@
                             task.isTypeFilterRes = true;
                             task.isStatusRes = true;
                             let ed = task.expiration_date;
+                            let cd = task.creation_date;
                             let year = Math.floor(ed / 10000);
                             task.expiration_date = new Date(year, Math.floor(task.expiration_date/100) - (year*100)-1, task.expiration_date % 100);
+                            year = Math.floor(cd / 10000);
+                            task.creation_date = new Date(year, Math.floor(task.creation_date/100) - (year*100)-1, task.creation_date % 100);
                         }
                         this.tasks.sort((a, b) => a.expiration_date > b.expiration_date ? 1 : -1);
                         this.filter_table();
@@ -119,6 +134,10 @@
                 await this.$router.push('/login');
             },
             async statusChanged(task){
+                await this.changeStatus(task);
+                this.$forceUpdate();
+            },
+            async changeStatus(task){
                 let for_send = {
                     id: task.id,
                     id_status: task.id_status

@@ -10,6 +10,7 @@
                 <th scope="col">Сделать до</th>
                 <th scope="col">Тип</th>
                 <th scope="col">Осталось дней</th>
+                <th scope="col">Создано</th>
             </tr>
             </thead>
             <tbody>
@@ -23,6 +24,7 @@
                     <div v-if="Math.floor(task.expiration_date - Date.now())>=0">{{Math.floor((task.expiration_date - Date.now())/86400000)}}</div>
                     <div v-else>Время истекло</div>
                 </td>
+                <td v-if="task.creation_date instanceof Date">{{task.creation_date.toLocaleDateString()}}</td>
             </tr>
             </tbody>
         </table>
@@ -64,8 +66,11 @@
                             task.isTypeFilterRes = true;
                             task.isStatusRes = true;
                             let ed = task.expiration_date;
+                            let cd = task.creation_date;
                             let year = Math.floor(ed / 10000);
                             task.expiration_date = new Date(year, Math.floor(task.expiration_date/100) - (year*100)-1, task.expiration_date % 100);
+                            year = Math.floor(cd / 10000);
+                            task.creation_date = new Date(year, Math.floor(task.creation_date/100) - (year*100)-1, task.creation_date % 100);
                         }
                         this.tasks.sort((a, b) => a.expiration_date > b.expiration_date ? 1 : -1);
                     }catch (e) {
