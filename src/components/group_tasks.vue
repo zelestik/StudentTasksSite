@@ -93,6 +93,7 @@
                 await this.$router.push('/login');
             },
             allTasksChecking(){
+                // Метод отметки всех задач
                 for (let task of this.tasks){
                     task.isChecked = !this.allTasksAreChecked;
                 }
@@ -100,11 +101,12 @@
 
             },
             checkForCheckBoxes(){
+                // Если отмечена хотя бы одна задача - isSomeChecked = true. Изменение этого свойства влияет на отображение плавающих кнопок
                 this.isSomeChecked = this.tasks.some(arrVal => arrVal.isChecked === true);
-                console.log(this.isSomeChecked);
             }
         },
         async created() {
+            // При запуске, если роль не определена - отправляем на страницу с задачами
             if (this.role === null){
                 await this.$router.push('/tasks');
             }

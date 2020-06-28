@@ -48,6 +48,7 @@
             }
         },
         async created(){
+            // При открытии смотрим куки. При наличии логина и пароля - пытаемся авторизоваться
             let username = document.cookie.replace(/(?:(?:^|.*;\s*)username=\s*\s*([^;]*).*$)|^.*$/, "$1");
             let password = document.cookie.replace(/(?:(?:^|.*;\s*)pass=\s*([^;]*).*$)|^.*$/, "$1");
             if (username !== "" && password !== "")

@@ -84,6 +84,7 @@
         },
         methods:{
             async manyStatusesChange(id_status){
+                // Метод смены статусов у выделенных задач
                 for (let task of this.tasks) {
                     if (task.isChecked){
                         task.id_status = id_status;
@@ -134,10 +135,12 @@
                 await this.$router.push('/login');
             },
             async statusChanged(task){
+                // При изменении статуса на клиенте - меняем его и не сервере
                 await this.changeStatus(task);
                 this.$forceUpdate();
             },
             async changeStatus(task){
+                // Метод изменения статуса на сервере
                 let for_send = {
                     id: task.id,
                     id_status: task.id_status
@@ -151,6 +154,7 @@
                 }
             },
             allTasksChecking(){
+                // Отметка всех задач при установке соответствующего чекбокса
                     for (let task of this.tasks){
                         task.isChecked = !this.allTasksAreChecked;
                     }
@@ -158,9 +162,8 @@
 
             },
             filter_table(){
-                console.log("1");
+                // Метод фильтрации данных по фильтрам и поиску
                 this.tasksForShow = [];
-                console.log(this.tasks);
                 for (let task of this.tasks){
                     if ((this.search_query === "" || task.name.includes(this.search_query) || task.description.includes(this.search_query)) &&
                         (this.role == 2 || this.status_filter_by_status == 0 || task.id_status === this.status_filter_by_status - 1 || (this.status_filter_by_status == 4 && (task.id_status === 0 || task.id_status === 1 ))) &&
@@ -171,8 +174,8 @@
                 }
             },
             checkForCheckBoxes(){
+                // Метод проверки выделения задач. Если задача отмечена isSomeChecked изменится на true и появятся всплывающие кнопки
                 this.isSomeChecked = this.tasks.some(arrVal => arrVal.isChecked === true);
-                console.log(this.isSomeChecked);
             }
         },
         created() {

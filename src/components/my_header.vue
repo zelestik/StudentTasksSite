@@ -50,10 +50,9 @@
             }
         },
         async created(){
+            // Если в куках нет логина и пароля. Отправляем на страницу авторизации
             if (!(document.cookie.replace(/(?:(?:^|.*;\s*)username=\s*\s*([^;]*).*$)|^.*$/, "$1").length>0 && document.cookie.replace(/(?:(?:^|.*;\s*)pass=\s*([^;]*).*$)|^.*$/, "$1").length>0))
                 await this.$router.push('/login');
-            console.log(this.group);
-
         }
     }
 </script>

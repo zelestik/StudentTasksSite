@@ -4,10 +4,11 @@
         <h1>Ваш профиль</h1>
         <p><b>Вас зовут:</b> <input type="text" disabled v-model="user_name"></p>
         <p v-if="group !== 'null'"><b>Ваша группа:</b> {{group}}</p>
+        <!-- В зависимости от ID роли выводим нужный статус-->
         <p v-if="role ==='0'">Вы - студент</p>
         <p v-if="role ==='1'">Вы - староста</p>
         <p v-if="role ==='2'">Вы - администратор</p>
-        <p><button class="btn">История авторизаций</button></p>
+        <p><button class="btn" @click="$router.push('/login_history')">История авторизаций</button></p>
     </div>
 </template>
 

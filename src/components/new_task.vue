@@ -52,19 +52,25 @@
                                 await this.$http.post(`http://ip2020.std-982.ist.mospolytech.ru/post_group_tasks/${this.username}/${this.pass}`, this.task).then((res) => (this.answer = res));
                             else
                                 await this.$http.post(`http://ip2020.std-982.ist.mospolytech.ru/post_tasks/${this.username}/${this.pass}`, this.task).then((res) => (this.answer = res));
+                            // Если в ответе "0" - задача успешно добавлена
                             if (this.answer.bodyText === "0") {
                                 alert("Успешно");
                                 await this.$router.push('/tasks');
-                            }else if (this.answer.bodyText === "-1" || this.answer.bodyText === "-2"){
+                            }
+                            // При получении "-1" или "-2" - возникла ошибка сервера
+                            else if (this.answer.bodyText === "-1" || this.answer.bodyText === "-2"){
                                 alert("Произошла ошибка сервера, повторите вход");
                                 console.log(this.answer);
                                 this.logout();
-                            }else{
+                            }
+                            // Если пришел неизвестный код, произошла неизвестная ошибка
+                            else{
                                 alert("Произошла неизвестная ошибка сервера, повторите вход");
                                 console.log(this.answer);
                                 this.logout();
                             }
                         }catch (e) {
+                            // Если произошла ошибка при подключении - проблемы с интернетом или с доступностью сервера
                             alert("Произошла ошибка сервера, повторите вход");
                             console.log(e);
                             this.logout();
@@ -84,6 +90,7 @@
             },
         },
         async created(){
+            // Админ не может находится на странице добавления задачи
             if (this.role === '2'){
                 await this.$router.push('/tasks');
             }
